@@ -28,7 +28,7 @@
             <div class="about-text">
                 <h1>Hi, I'm <span class="highlight">GeloSy</span></h1>
                 <h4>Angelo Savilla Cambe</h4>
-                <p>I’m a 2nd-year college student at <strong>Quezon City University</strong> and a passionate backend developer who builds scalable solutions with innovative tech. Let’s make something awesome together!</p>
+                <p>I'm a 2nd-year college student at <strong>Quezon City University</strong> and a passionate backend developer who builds scalable solutions with innovative tech. Let's make something awesome together!</p>
             </div>
         </div>
     </section>
@@ -73,9 +73,49 @@
                 <h3>Ordering System</h3>
                 <p>Real-time tracking and inventory updates for seamless ordering.</p>
             </div>
+            
+            <!-- New Psychological Game Project -->
+            <div class="project-card">
+                <div class="project-gallery">
+                    <div class="gallery-container">
+                        <img src="images/heed1.png" alt="HEED Game Screenshot 1" class="project-image">
+                        <img src="images/heed2.png" alt="HEED Game Screenshot 2" class="project-image">
+                        <img src="images/heed3.png" alt="HEED Game Screenshot 3" class="project-image">
+                        <img src="images/heed4.png" alt="HEED Game Screenshot 4" class="project-image">
+                        <img src="images/heed5.png" alt="HEED Game Screenshot 5" class="project-image">
+                        <img src="images/heed6.png" alt="HEED Game Screenshot 6" class="project-image">
+                        <img src="images/heed7.png" alt="HEED Game Screenshot 7" class="project-image">
+                        <img src="images/heed8.png" alt="HEED Game Screenshot 8" class="project-image">
+                    </div>
+                    <div class="gallery-controls">
+                        <button class="gallery-prev">←</button>
+                        <span class="gallery-counter">1/8</span>
+                        <button class="gallery-next">→</button>
+                    </div>
+                </div>
+                <h3>HEED: Psychological Games</h3>
+                <p>A collection of psychological games designed to improve attention span and reduce excessive screen time through engaging mental exercises.</p>
+            </div>
+            
+            <!-- Quiz System Project -->
+            <div class="project-card">
+                <div class="project-gallery">
+                    <div class="gallery-container">
+                        <img src="images/quiz1.png" alt="Quiz System Screenshot 1" class="project-image">
+                        <img src="images/quiz2.png" alt="Quiz System Screenshot 2" class="project-image">
+                        <img src="images/quiz3.png" alt="Quiz System Screenshot 3" class="project-image">
+                    </div>
+                    <div class="gallery-controls">
+                        <button class="gallery-prev">←</button>
+                        <span class="gallery-counter">1/3</span>
+                        <button class="gallery-next">→</button>
+                    </div>
+                </div>
+                <h3>IPT102 Quizes</h3>
+                <!-- <p>An engaging quiz platform with 3 different quiz modules designed to test knowledge and provide instant feedback.</p> -->
+            </div>
         </div>
     </section>
-    
 
     <section id="contact" class="section">
         <h2>Contact</h2>
@@ -85,12 +125,53 @@
             <a href="https://ngl.link/kambe40644">📩 Anonymous</a>
             <a href="https://www.facebook.com/angelocambee" target="_blank">👤 Facebook: Angelo Cambe</a>
         </div>
-        </div>
     </section>
 
     <footer>
         <p>&copy; 2024 GeloSy</p>
     </footer>
+
+    <script>
+        // Image gallery functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const galleries = document.querySelectorAll('.project-gallery');
+            
+            galleries.forEach(gallery => {
+                const container = gallery.querySelector('.gallery-container');
+                const images = container.querySelectorAll('img');
+                const counter = gallery.querySelector('.gallery-counter');
+                const prevBtn = gallery.querySelector('.gallery-prev');
+                const nextBtn = gallery.querySelector('.gallery-next');
+                const totalImages = images.length;
+                let currentIndex = 0;
+                
+                // Show only the first image initially
+                images.forEach((img, index) => {
+                    img.style.display = index === 0 ? 'block' : 'none';
+                });
+                
+                function updateGallery() {
+                    images.forEach((img, index) => {
+                        img.style.display = index === currentIndex ? 'block' : 'none';
+                    });
+                    counter.textContent = `${currentIndex + 1}/${totalImages}`;
+                }
+                
+                prevBtn.addEventListener('click', () => {
+                    currentIndex = (currentIndex - 1 + totalImages) % totalImages;
+                    updateGallery();
+                });
+                
+                nextBtn.addEventListener('click', () => {
+                    currentIndex = (currentIndex + 1) % totalImages;
+                    updateGallery();
+                });
+                
+                // Initialize counter
+                counter.textContent = `1/${totalImages}`;
+            });
+        });
+    </script>
 </body>
 
 </html>
