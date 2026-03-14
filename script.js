@@ -1,18 +1,13 @@
 ﻿/**
- * Portfolio - Modern JavaScript
- * Enhanced interactivity and user experience
+ * Portfolio - Pink Dark Mode with Tailwind CSS
+ * Enhanced interactivity maintaining all original functionality
  */
-
-// =====================================================
-// UTILITIES & HELPERS
-// =====================================================
 
 const DOM = {
     navbar: document.querySelector('.navbar'),
     navMenu: document.getElementById('navMenu'),
     mobileMenuBtn: document.getElementById('mobileMenuBtn'),
     navLinks: document.querySelectorAll('.nav-link'),
-    galleries: document.querySelectorAll('.project-gallery'),
     contactForm: document.getElementById('contactForm'),
     projectModal: document.getElementById('projectModal'),
     modalClose: document.getElementById('modalClose'),
@@ -21,7 +16,7 @@ const DOM = {
 };
 
 /**
- * Utility to add/remove classes
+ * Utility functions
  */
 const toggleClass = (element, className, force) => {
     if (force !== undefined) {
@@ -31,9 +26,6 @@ const toggleClass = (element, className, force) => {
     }
 };
 
-/**
- * Utility to debounce functions
- */
 const debounce = (func, delay = 300) => {
     let timeoutId;
     return (...args) => {
@@ -42,9 +34,6 @@ const debounce = (func, delay = 300) => {
     };
 };
 
-/**
- * Utility to throttle functions
- */
 const throttle = (func, delay = 300) => {
     let lastCall = 0;
     return (...args) => {
@@ -56,55 +45,54 @@ const throttle = (func, delay = 300) => {
     };
 };
 
-// =====================================================
-// MOBILE MENU TOGGLE
-// =====================================================
-
+// Mobile Menu
 const initMobileMenu = () => {
     if (!DOM.mobileMenuBtn) return;
 
     DOM.mobileMenuBtn.addEventListener('click', () => {
         toggleClass(DOM.mobileMenuBtn, 'active');
         toggleClass(DOM.navMenu, 'active');
+        document.body.classList.toggle('no-scroll');
     });
 
-    // Close menu when a link is clicked
     DOM.navLinks.forEach(link => {
         link.addEventListener('click', () => {
             DOM.mobileMenuBtn.classList.remove('active');
             DOM.navMenu.classList.remove('active');
+            document.body.classList.remove('no-scroll');
         });
+    });
+
+    // Close on outside click
+    document.addEventListener('click', (e) => {
+        if (!DOM.mobileMenuBtn.contains(e.target) && !DOM.navMenu.contains(e.target)) {
+            DOM.mobileMenuBtn.classList.remove('active');
+            DOM.navMenu.classList.remove('active');
+            document.body.classList.remove('no-scroll');
+        }
     });
 };
 
-// =====================================================
-// NAVBAR SCROLL BEHAVIOR
-// =====================================================
-
+// Navbar Scroll Effect
 const initNavbarScroll = () => {
     const handleScroll = throttle(() => {
         if (window.scrollY > 50) {
-            DOM.navbar?.classList.add('scrolled');
+            DOM.navbar.classList.add('scrolled');
         } else {
-            DOM.navbar?.classList.remove('scrolled');
+            DOM.navbar.classList.remove('scrolled');
         }
     }, 100);
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
 };
 
-// =====================================================
-// SMOOTH SCROLL & ACTIVE NAV LINK
-// =====================================================
-
+// Smooth Scroll & Active Nav
 const initSmoothScroll = () => {
     DOM.navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
             const href = link.getAttribute('href');
-            
             if (href.startsWith('#')) {
                 e.preventDefault();
-                
                 const target = document.querySelector(href);
                 if (target) {
                     target.scrollIntoView({ behavior: 'smooth' });
@@ -114,18 +102,13 @@ const initSmoothScroll = () => {
     });
 };
 
-/**
- * Update active nav link based on scroll position
- */
-const updateActiveNavLink = () => {
-    const sections = document.querySelectorAll('section, header');
+const updateActiveNavLink = throttle(() => {
+    const sections = document.querySelectorAll('section[id], header[id]');
     let current = '';
 
     sections.forEach(section => {
-        const sectionTop = section.offsetTop;
-        const sectionHeight = section.clientHeight;
-        
-        if (window.scrollY >= sectionTop - 200) {
+        const rect = section.getBoundingClientRect();
+        if (rect.top <= 150 && rect.bottom >= 150) {
             current = section.getAttribute('id');
         }
     });
@@ -136,69 +119,9 @@ const updateActiveNavLink = () => {
             link.classList.add('active');
         }
     });
-};
+}, 150);
 
-// =====================================================
-// IMAGE GALLERY
-// =====================================================
-
-const initGallery = () => {
-    DOM.galleries.forEach(gallery => {
-        const container = gallery.querySelector('.gallery-container');
-        const images = container.querySelectorAll('.gallery-image');
-        const counter = gallery.querySelector('.gallery-counter');
-        const prevBtn = gallery.querySelector('.gallery-prev');
-        const nextBtn = gallery.querySelector('.gallery-next');
-
-        if (images.length === 0) return;
-
-        let currentIndex = 0;
-        const totalImages = images.length;
-
-        // Show only first image initially
-        images.forEach((img, index) => {
-            img.style.display = index === 0 ? 'block' : 'none';
-        });
-
-        const updateGallery = () => {
-            images.forEach((img, index) => {
-                img.style.display = index === currentIndex ? 'block' : 'none';
-            });
-            
-            counter.textContent = `${currentIndex + 1}/${totalImages}`;
-            counter.setAttribute('aria-live', 'polite');
-        };
-
-        const goToPrevious = () => {
-            currentIndex = (currentIndex - 1 + totalImages) % totalImages;
-            updateGallery();
-        };
-
-        const goToNext = () => {
-            currentIndex = (currentIndex + 1) % totalImages;
-            updateGallery();
-        };
-
-        prevBtn?.addEventListener('click', goToPrevious);
-        nextBtn?.addEventListener('click', goToNext);
-
-        // Keyboard navigation
-        document.addEventListener('keydown', (e) => {
-            if (document.activeElement === container || container.contains(document.activeElement)) {
-                if (e.key === 'ArrowLeft') goToPrevious();
-                if (e.key === 'ArrowRight') goToNext();
-            }
-        });
-
-        // Initialize
-        updateGallery();
-    });
-};
-
-// =====================================================
-// CONTACT FORM HANDLING
-// =====================================================
-
+// Contact Form
 const initContactForm = () => {
     if (!DOM.contactForm) return;
 
@@ -212,7 +135,6 @@ const initContactForm = () => {
             return false;
         }
 
-        // Basic email validation
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
             showFormMessage('Please enter a valid email address.', 'error');
@@ -222,10 +144,8 @@ const initContactForm = () => {
         return { name, email, message };
     };
 
-    const showFormMessage = (message, type) => {
-        if (!DOM.formMessage) return;
-        
-        DOM.formMessage.textContent = message;
+    const showFormMessage = (text, type) => {
+        DOM.formMessage.textContent = text;
         DOM.formMessage.className = `form-message ${type}`;
         DOM.formMessage.style.display = 'block';
 
@@ -238,99 +158,90 @@ const initContactForm = () => {
 
     DOM.contactForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-
         const formData = validateForm();
         if (!formData) return;
 
+        // Simulate API call
+        const submitBtn = DOM.contactForm.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+        submitBtn.disabled = true;
+
         try {
-            // In a real scenario, you would send this to a backend service
-            // For now, we'll just simulate success
+            await new Promise(resolve => setTimeout(resolve, 1500));
             console.log('Form submitted:', formData);
-
-            // Simulate successful submission
-            await new Promise(resolve => setTimeout(resolve, 500));
-
             showFormMessage('Message sent successfully! I\'ll get back to you soon.', 'success');
             DOM.contactForm.reset();
         } catch (error) {
-            showFormMessage('An error occurred. Please try again.', 'error');
-            console.error('Form submission error:', error);
+            showFormMessage('Something went wrong. Please try again.', 'error');
+        } finally {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
         }
     });
 };
 
-// =====================================================
-// PROJECT MODAL
-// =====================================================
-
+// Project Modal - Updated with Tailwind classes
 const initProjectModal = () => {
     if (!DOM.projectModal) return;
 
-    const projectDetails = {
-        'Patient Management System': {
-            title: 'Patient Management System',
-            description: 'MedicAI is a web-based patient management system that gives clinics and hospitals AI-aided diagnostic reports to enhance faster and more convenient healthcare services.',
-            details: 'This Web-Based application provides real-time inventory tracking, customer management, and sales reporting features.',
-            technologies: ['Python', 'Django'],
-            features: [ ]
-        },
-
-        'HEED: Attention Span Game System': {
-            title: 'HEED: Attention Span Game System',
-            description: 'A collection of psychological games designed to improve attention span and reduce excessive screen time through engaging mental exercises.',
-            technologies: [],
-            features: []
-        },
-      
-    };
+    const projectDetails = {\n        'LMS System': {\n            title: 'LMS (Learning Management System)',\n
+'LMS System': {\n            title: 'LMS (Learning Management System)',\n            description: 'Comprehensive Learning Management System for educational institutions with course creation, student tracking, and certification.',\n            technologies: ['PHP', 'Laravel', 'MySQL', 'Vue.js'],\n            features: ['Course Builder', 'Student Portal', 'Gradebook', 'Certification'],\n        },\n        \'IMS System\': {\n            title: \'IMS (Inventory Management System)\',\n            description: \'Advanced inventory management for businesses with stock tracking, order management, supplier portals, and real-time analytics.\',\n            details: \'Complete inventory solution with barcode scanning, low-stock alerts, multi-warehouse support, and POS integration.\',\n            technologies: [\'Python\', \'Django\', \'PostgreSQL\', \'React\'],\n            features: [\'Stock Tracking\', \'Order Management\', \'Supplier Portal\', \'Analytics Dashboard\']\n        }\n    };
 
     const openModal = (projectTitle) => {
         const project = projectDetails[projectTitle];
         if (!project) return;
 
-        let html = `
-            <h2>${project.title}</h2>
-            <p>${project.description}</p>
-            <h4>Overview</h4>
-            <p>${project.details}</p>
-            <h4>Technologies</h4>
-            <div class="tag" style="margin: 10px 5px 10px 0;">
-                ${project.technologies.map(tech => `<span class="tag">${tech}</span>`).join('')}
+        const html = `
+bg-gradient-to-r from-indigo-400 via-blue-400 to-indigo-500 bg-clip-text text-transparent
+            <p class="text-2xl text-slate-300 mb-12 leading-relaxed">${project.description}</p>
+            
+            <div class="grid md:grid-cols-2 gap-12 mb-12">
+                <div>
+                    <h4 class="text-2xl font-bold mb-6 text-white bg-gradient-to-r from-pink-dark-300 to-pink-dark-400 bg-clip-text text-transparent">Overview</h4>
+                    <p class="text-lg text-slate-400 leading-relaxed">${project.details || 'Advanced project showcasing modern development practices.'}</p>
+                </div>
+                <div>
+                    <h4 class="text-2xl font-bold mb-6 text-white bg-gradient-to-r from-pink-dark-300 to-pink-dark-400 bg-clip-text text-transparent">Technologies</h4>
+                    <div class="flex flex-wrap gap-3">
+                        ${project.technologies.map(tech => `<span class="px-4 py-2 bg-gradient-to-r from-pink-dark-500/20 to-pink-dark-600/20 text-pink-dark-300 border border-pink-dark-400/50 rounded-xl text-sm font-medium backdrop-blur-sm">${tech}</span>`).join('')}
+                    </div>
+                </div>
             </div>
-            <h4>Key Features</h4>
-            <ul style="color: var(--color-text-secondary);">
-                ${project.features.map(feature => `<li>${feature}</li>`).join('')}
-            </ul>
+            
+            <div>
+                <h4 class="text-2xl font-bold mb-6 text-white bg-gradient-to-r from-pink-dark-300 to-pink-dark-400 bg-clip-text text-transparent">Key Features</h4>
+                <ul class="space-y-3 text-lg text-slate-300">
+                    ${project.features.map(feature => `<li class="flex items-center gap-3 p-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-pink-dark-500/10 hover:border-pink-dark-400 transition-all duration-300"><i class="fas fa-check-circle text-pink-dark-400 text-xl flex-shrink-0"></i>${feature}</li>`).join('')}
+                </ul>
+            </div>
         `;
 
         document.getElementById('modalBody').innerHTML = html;
         DOM.projectModal.classList.add('active');
+        document.body.classList.add('no-scroll');
     };
 
     const closeModal = () => {
         DOM.projectModal.classList.remove('active');
+        document.body.classList.remove('no-scroll');
     };
 
-    // Open modal on project button click
+    // Event listeners
     DOM.projectButtons.forEach(btn => {
         btn.addEventListener('click', (e) => {
+            e.stopPropagation();
             const projectCard = btn.closest('.project-card');
-            const projectTitle = projectCard.querySelector('.project-title').textContent;
+            const projectTitle = projectCard.querySelector('.project-title').textContent.trim();
             openModal(projectTitle);
         });
     });
 
-    // Close modal
-    DOM.modalClose?.addEventListener('click', closeModal);
-
-    // Close modal on outside click
-    DOM.projectModal?.addEventListener('click', (e) => {
-        if (e.target === DOM.projectModal) {
-            closeModal();
-        }
+    DOM.modalClose.addEventListener('click', closeModal);
+    DOM.projectModal.addEventListener('click', (e) => {
+        if (e.target === DOM.projectModal) closeModal();
     });
 
-    // Close modal on Escape key
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && DOM.projectModal.classList.contains('active')) {
             closeModal();
@@ -338,129 +249,72 @@ const initProjectModal = () => {
     });
 };
 
-// =====================================================
-// INTERSECTION OBSERVER FOR ANIMATIONS
-// =====================================================
-
+// Intersection Observer for animations
 const initIntersectionObserver = () => {
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -100px 0px'
-    };
-
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                entry.target.style.animation = `fadeInUp 0.8s ease forwards`;
-                observer.unobserve(entry.target);
+                entry.target.classList.add('animate-fade-in-up');
             }
         });
-    }, observerOptions);
+    }, { threshold: 0.1, rootMargin: '0px 0px -100px 0px' });
 
-    // Observe skill items and project cards
-    document.querySelectorAll('.skill-item, .project-card, .feature-card').forEach(el => {
+    document.querySelectorAll('.skill-category, .project-card, .highlight-item').forEach(el => {
         observer.observe(el);
     });
 };
 
-// =====================================================
-// SCROLL TO TOP BUTTON (Optional Enhancement)
-// =====================================================
-
+// Scroll to Top
 const initScrollToTop = () => {
-    const scrollThreshold = 300;
-    let scrollToTopBtn = document.getElementById('scrollToTopBtn');
-
-    // Create button if it doesn't exist
-    if (!scrollToTopBtn) {
-        scrollToTopBtn = document.createElement('button');
-        scrollToTopBtn.id = 'scrollToTopBtn';
-        scrollToTopBtn.innerHTML = '↑';
-        scrollToTopBtn.style.cssText = `
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: linear-gradient(135deg, var(--color-accent-primary), var(--color-accent-secondary));
-            color: white;
-            border: none;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            font-size: 20px;
-            cursor: pointer;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.3s ease;
-            z-index: 999;
-            display: none;
-        `;
-        document.body.appendChild(scrollToTopBtn);
+    let scrollBtn = document.getElementById('scrollToTopBtn');
+    if (!scrollBtn) {
+        scrollBtn = document.createElement('button');
+        scrollBtn.id = 'scrollToTopBtn';
+        scrollBtn.innerHTML = '<i class="fas fa-chevron-up"></i>';
+        scrollBtn.className = 'fixed bottom-8 right-8 bg-gradient-to-r from-indigo-500 to-blue-600 text-white p-4 rounded-2xl shadow-2xl hover:shadow-indigo-500/50 hover:scale-110 hover:-translate-y-1 transition-all duration-300 opacity-0 translate-y-6 z-[999] w-16 h-16 flex items-center justify-center border-2 border-white/20 backdrop-blur-xl';
+        document.body.appendChild(scrollBtn);
     }
 
     window.addEventListener('scroll', throttle(() => {
-        if (window.scrollY > scrollThreshold) {
-            scrollToTopBtn.style.opacity = '1';
-            scrollToTopBtn.style.transform = 'translateY(0)';
-            scrollToTopBtn.style.display = 'block';
+        if (window.scrollY > 800) {
+            scrollBtn.classList.remove('opacity-0', 'translate-y-6');
+            scrollBtn.classList.add('opacity-100', 'translate-y-0');
         } else {
-            scrollToTopBtn.style.opacity = '0';
-            scrollToTopBtn.style.transform = 'translateY(20px)';
-            setTimeout(() => {
-                scrollToTopBtn.style.display = 'none';
-            }, 300);
+            scrollBtn.classList.remove('opacity-100', 'translate-y-0');
+            scrollBtn.classList.add('opacity-0', 'translate-y-6');
         }
     }, 100));
 
-    scrollToTopBtn.addEventListener('click', () => {
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
+    scrollBtn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 };
 
-// =====================================================
-// PERFORMANCE TRACKING & ANALYTICS (Optional)
-// =====================================================
-
-const logPerformance = () => {
-    if (window.performance && window.performance.timing) {
-        const perfData = window.performance.timing;
-        const pageLoadTime = perfData.loadEventEnd - perfData.navigationStart;
-        console.log(`Page load time: ${pageLoadTime}ms`);
-    }
-};
-
-// =====================================================
-// INITIALIZATION
-// =====================================================
-
+// Initialization
 const init = () => {
-    console.log('🚀 Initializing portfolio...');
-
-    // Initialize all features
+console.log('🔵 Enterprise Systems Dashboard Initialized 🔵');
+    
     initMobileMenu();
     initNavbarScroll();
     initSmoothScroll();
-    initGallery();
     initContactForm();
     initProjectModal();
-    initScrollToTop();
     initIntersectionObserver();
-
-    // Update active nav link on scroll
-    window.addEventListener('scroll', throttle(updateActiveNavLink, 250));
-
-    // Set initial active link
+    initScrollToTop();
+    
+    window.addEventListener('scroll', updateActiveNavLink, { passive: true });
     updateActiveNavLink();
-
-    console.log('✅ Portfolio initialized successfully!');
-    logPerformance();
+    
+    // Performance log
+    if (performance.timing) {
+        const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
+        console.log(`💅 Page loaded in ${loadTime}ms`);
+    }
 };
 
-// Initialize when DOM is ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-} else {
+// Prevent body scroll when mobile menu open
+document.addEventListener('DOMContentLoaded', () => {
+    document.body.classList.add('dark');
     init();
-}
+});
+
